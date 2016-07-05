@@ -9,7 +9,10 @@ var {
   View,
   Text,
   RefreshControl,
+  Dimensions,
 } = require('react-native');
+
+var screenWidth = Dimensions.get('window').width;
 
 
 // small helper function which merged two objects into one
@@ -89,7 +92,6 @@ var GiftedListView = React.createClass({
   _setRows(rows) { this._rows = rows; },
   _getRows() { return this._rows; },
 
-
   paginationFetchingView() {
     if (this.props.paginationFetchingView) {
       return this.props.paginationFetchingView();
@@ -138,6 +140,10 @@ var GiftedListView = React.createClass({
     return this.props.headerView();
   },
   emptyView(refreshCallback) {
+    if (this.props.altView) {
+      return this.props.altView();
+    }
+
     if (this.props.emptyView) {
       return this.props.emptyView(refreshCallback);
     }
@@ -193,6 +199,20 @@ var GiftedListView = React.createClass({
         isRefreshing: false,
         paginationStatus: 'firstLoad',
       };
+    }
+  },
+
+  /*
+   * Shows alternate view by removing all rows, and showing alt view in footer
+   */
+  toggleAltView(on = false) {
+    if (on) {
+      this._rowsCopy = this._getRows();
+      this._setRows([]);
+      this._updateRows([]);
+    } else {
+      this._setRows(this._rowsCopy);
+      this._updateRows(this._rowsCopy);
     }
   },
 
@@ -334,9 +354,11 @@ var GiftedListView = React.createClass({
     },
     paginationView: {
       height: 44,
+      width: screenWidth,
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#FFF',
+      marginTop: 11,
     },
     defaultView: {
       justifyContent: 'center',
